@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Rehabilita 3D</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+:root{--bg:#0d1f13;--surface:#1a2e1f;--surface2:#203828;--border:#2a4035;--accent:#4caf7d;--danger:#b83232;--text:#f0ede6;--text2:#a8b8a0;--text3:#6a8070;--radius:10px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+
+/* LOGIN */
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:380px;text-align:center;}
+.login-icon{font-size:40px;margin-bottom:16px;}
+.login-title{font-size:20px;font-weight:600;margin-bottom:6px;}
+.login-sub{font-size:13px;color:var(--text2);margin-bottom:24px;}
+.login-input{width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:14px;text-align:center;outline:none;margin-bottom:12px;transition:border-color .15s;}
+.login-input:focus{border-color:var(--accent);}
+.login-btn{width:100%;padding:12px;background:var(--accent);color:#0d1f13;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s;}
+.login-btn:hover{background:#5dc98e;}
+.login-error{color:var(--danger);font-size:13px;margin-top:8px;display:none;}
+
+/* ADMIN */
+.admin{display:none;width:100%;max-width:900px;}
+.admin-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.admin-title{font-size:22px;font-weight:600;}
+.admin-title span{color:var(--accent);}
+.logout-btn{background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:6px;padding:6px 14px;font-family:inherit;font-size:13px;cursor:pointer;}
+.logout-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px;}
+.card-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px;}
+
+/* GENERATOR */
+.gen-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:600px){.gen-grid{grid-template-columns:1fr;}}
+.gen-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;}
+.gen-label{font-size:13px;font-weight:500;margin-bottom:8px;}
+.gen-label span{color:var(--accent);}
+.gen-controls{display:flex;gap:8px;margin-bottom:12px;align-items:center;}
+.gen-count{width:70px;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;text-align:center;outline:none;}
+.gen-btn{padding:7px 14px;background:var(--accent);color:#0d1f13;border:none;border-radius:6px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;flex:1;}
+.gen-btn:hover{background:#5dc98e;}
+.gen-btn.enc{background:#c9a84c;color:#1a1200;}
+.gen-btn.enc:hover{background:#dbb85a;}
+.codes-output{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;min-height:100px;font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);line-height:1.8;white-space:pre-wrap;word-break:break-all;}
+.codes-output.enc{color:#c9a84c;}
+.copy-btn{margin-top:8px;width:100%;padding:7px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text2);font-family:inherit;font-size:12px;cursor:pointer;transition:all .15s;}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent);}
+.copy-btn.copied{border-color:var(--accent);color:var(--accent);}
+
+/* REGISTRO */
+.registro-table{width:100%;border-collapse:collapse;font-size:13px;}
+.registro-table th{background:var(--surface2);padding:8px 12px;text-align:left;font-size:11px;color:var(--text2);font-weight:500;border-bottom:1px solid var(--border);}
+.registro-table td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.registro-table tr:last-child td{border-bottom:none;}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;}
+.badge-prem{background:#4caf7d22;color:var(--accent);}
+.badge-enc{background:#c9a84c18;color:#c9a84c;}
+.badge-ok{background:#1a4a2220;color:#4caf7d;}
+.badge-used{background:#b8323220;color:#b83232;}
+.registro-input{padding:6px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;width:100%;outline:none;}
+.registro-input:focus{border-color:var(--accent);}
+.add-btn{padding:8px 16px;background:var(--accent);color:#0d1f13;border:none;border-radius:6px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;}
+.add-btn:hover{background:#5dc98e;}
+.del-btn{padding:3px 8px;background:transparent;color:var(--text3);border:1px solid var(--border);border-radius:4px;cursor:pointer;font-size:11px;}
+.del-btn:hover{border-color:var(--danger);color:var(--danger);}
+.estado-sel{padding:4px 8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:12px;outline:none;}
+
+/* STATS */
+.stats-mini{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.stat-mini{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;flex:1;min-width:100px;text-align:center;}
+.stat-mini-val{font-size:24px;font-weight:700;color:var(--accent);font-family:'DM Mono',monospace;}
+.stat-mini-label{font-size:11px;color:var(--text2);margin-top:2px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-box" id="login-box">
+  <div class="login-icon">&#128274;</div>
+  <div class="login-title">Panel Administrador</div>
+  <div class="login-sub">Rehabilita 3D · Acceso restringido</div>
+  <input type="password" class="login-input" id="pass-input" placeholder="Contraseña" onkeydown="if(event.key==='Enter')verificarPass()"/>
+  <button class="login-btn" onclick="verificarPass()">Ingresar</button>
+  <div class="login-error" id="login-error">Contraseña incorrecta</div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin" id="admin-panel">
+  <div class="admin-header">
+    <div class="admin-title">Panel <span>Admin</span> · Rehabilita 3D</div>
+    <button class="logout-btn" onclick="cerrarAdmin()">&#x2715; Cerrar sesión</button>
+  </div>
+
+  <!-- ESTADÍSTICAS -->
+  <div class="card">
+    <div class="card-title">Resumen de códigos</div>
+    <div class="stats-mini" id="stats-mini"></div>
+  </div>
+
+  <!-- GENERADOR -->
+  <div class="card">
+    <div class="card-title">Generador de códigos</div>
+    <div class="gen-grid">
+      <div class="gen-box">
+        <div class="gen-label">Códigos <span>Premium</span></div>
+        <div class="gen-controls">
+          <input type="number" class="gen-count" id="count-prem" value="5" min="1" max="50"/>
+          <button class="gen-btn" onclick="generarCodigos('PREM')">Generar</button>
+        </div>
+        <div class="codes-output" id="output-prem">Los códigos aparecerán aquí...</div>
+        <button class="copy-btn" id="copy-prem" onclick="copiarCodigos('prem')">&#128203; Copiar códigos</button>
+      </div>
+      <div class="gen-box">
+        <div class="gen-label">Códigos <span style="color:#c9a84c;">Encargado</span></div>
+        <div class="gen-controls">
+          <input type="number" class="gen-count" id="count-enc" value="3" min="1" max="20"/>
+          <button class="gen-btn enc" onclick="generarCodigos('ENC')">Generar</button>
+        </div>
+        <div class="codes-output enc" id="output-enc">Los códigos aparecerán aquí...</div>
+        <button class="copy-btn" id="copy-enc" onclick="copiarCodigos('enc')">&#128203; Copiar códigos</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGISTRO -->
+  <div class="card">
+    <div class="card-title">Registro de códigos entregados</div>
+
+    <!-- Agregar código -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:16px;flex-wrap:wrap;" id="add-form">
+      <input type="text" class="registro-input" id="reg-codigo" placeholder="PREM-XXXX-XXXX" oninput="this.value=this.value.toUpperCase()"/>
+      <input type="text" class="registro-input" id="reg-usuario" placeholder="Nombre usuario"/>
+      <input type="text" class="registro-input" id="reg-email" placeholder="Email"/>
+      <input type="date" class="registro-input" id="reg-vence"/>
+      <button class="add-btn" onclick="agregarRegistro()">+ Agregar</button>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table class="registro-table" id="registro-table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Tipo</th>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>Vencimiento</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="registro-body"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">
+      <button class="copy-btn" style="width:auto;padding:7px 14px;" onclick="exportarRegistro()">&#8595; Exportar CSV</button>
+    </div>
+  </div>
+
+  <!-- CAMBIAR CONTRASEÑA -->
+  <div class="card">
+    <div class="card-title">Cambiar contraseña de acceso</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;flex-wrap:wrap;" id="pass-form">
+      <div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px;">Contraseña actual</div>
+        <input type="password" class="registro-input" id="pass-actual" placeholder="Contraseña actual"/>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px;">Nueva contraseña</div>
+        <input type="password" class="registro-input" id="pass-nueva" placeholder="Nueva contraseña"/>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px;">Confirmar nueva</div>
+        <input type="password" class="registro-input" id="pass-confirmar" placeholder="Confirmar contraseña"/>
+      </div>
+      <button class="add-btn" onclick="cambiarPassword()">Cambiar</button>
+    </div>
+    <div id="pass-msg" style="margin-top:10px;font-size:13px;display:none;"></div>
+    <div style="margin-top:12px;padding:10px 14px;background:var(--bg);border-radius:6px;font-size:12px;color:var(--text3);">
+      &#9432; Contraseña maestra de respaldo: <strong style="color:var(--text2);">Rehabilita3D2026!</strong> — úsala si olvidas tu contraseña personalizada.
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ===== CONTRASEÑA =====
+const PASS_MAESTRA='Rehabilita3D2026!'; // Contraseña de respaldo — nunca cambia
+
+function getPassActual(){
+  return localStorage.getItem('rp_admin_pass')||PASS_MAESTRA;
+}
+
+async function sha256(msg){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function verificarPass(){
+  const pass=document.getElementById('pass-input').value;
+  const passActual=getPassActual();
+  if(pass===passActual||pass===PASS_MAESTRA){
+    sessionStorage.setItem('rp_admin','1');
+    mostrarAdmin();
+  } else {
+    document.getElementById('login-error').style.display='block';
+    document.getElementById('pass-input').value='';
+  }
+}
+
+async function cambiarPassword(){
+  const actual=document.getElementById('pass-actual').value;
+  const nueva=document.getElementById('pass-nueva').value;
+  const confirmar=document.getElementById('pass-confirmar').value;
+  const msg=document.getElementById('pass-msg');
+
+  // Validaciones
+  if(actual!==getPassActual()&&actual!==PASS_MAESTRA){
+    msg.style.display='block';msg.style.color='var(--danger)';
+    msg.textContent='&#x2715; La contraseña actual es incorrecta.';return;
+  }
+  if(nueva.length<8){
+    msg.style.display='block';msg.style.color='var(--danger)';
+    msg.textContent='&#x2715; La nueva contraseña debe tener al menos 8 caracteres.';return;
+  }
+  if(nueva!==confirmar){
+    msg.style.display='block';msg.style.color='var(--danger)';
+    msg.textContent='&#x2715; Las contraseñas no coinciden.';return;
+  }
+  if(nueva===PASS_MAESTRA){
+    msg.style.display='block';msg.style.color='var(--danger)';
+    msg.textContent='&#x2715; No puedes usar la contraseña maestra como contraseña personalizada.';return;
+  }
+
+  // Guardar nueva contraseña
+  localStorage.setItem('rp_admin_pass',nueva);
+  document.getElementById('pass-actual').value='';
+  document.getElementById('pass-nueva').value='';
+  document.getElementById('pass-confirmar').value='';
+  msg.style.display='block';msg.style.color='var(--accent)';
+  msg.textContent='&#10003; Contraseña cambiada correctamente. Recuérdala bien.';
+  setTimeout(()=>{msg.style.display='none';},4000);
+}
+
+function cerrarAdmin(){
+  sessionStorage.removeItem('rp_admin');
+  document.getElementById('admin-panel').style.display='none';
+  document.getElementById('login-box').style.display='block';
+}
+
+function mostrarAdmin(){
+  document.getElementById('login-box').style.display='none';
+  document.getElementById('admin-panel').style.display='block';
+  renderStats();
+  renderRegistro();
+}
+
+// Check session
+if(sessionStorage.getItem('rp_admin')==='1') mostrarAdmin();
+
+// ===== GENERADOR =====
+function randStr(n){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let r='';
+  for(let i=0;i<n;i++)r+=chars[Math.floor(Math.random()*chars.length)];
+  return r;
+}
+
+function generarCodigos(prefix){
+  const isEnc=prefix==='ENC';
+  const count=parseInt(document.getElementById('count-'+(isEnc?'enc':'prem')).value)||5;
+  const codes=[];
+  for(let i=0;i<count;i++) codes.push(prefix+'-'+randStr(4)+'-'+randStr(4));
+  const outEl=document.getElementById('output-'+(isEnc?'enc':'prem'));
+  outEl.textContent=codes.join('\n');
+  return codes;
+}
+
+function copiarCodigos(tipo){
+  const text=document.getElementById('output-'+tipo).textContent;
+  if(!text||text.includes('aparecerán'))return;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.getElementById('copy-'+tipo);
+    btn.textContent='✓ Copiado!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='📋 Copiar códigos';btn.classList.remove('copied');},2000);
+  });
+}
+
+// ===== REGISTRO =====
+function loadRegistro(){try{return JSON.parse(localStorage.getItem('rp_admin_registro'))||[];}catch{return[];}}
+function saveRegistro(r){localStorage.setItem('rp_admin_registro',JSON.stringify(r));}
+
+function renderStats(){
+  const reg=loadRegistro();
+  const prems=reg.filter(r=>r.codigo.startsWith('PREM'));
+  const encs=reg.filter(r=>r.codigo.startsWith('ENC'));
+  const usados=reg.filter(r=>r.estado==='Activo');
+  const vencidos=reg.filter(r=>r.estado==='Vencido'||new Date(r.vence)<new Date());
+  document.getElementById('stats-mini').innerHTML=
+    '<div class="stat-mini"><div class="stat-mini-val">'+reg.length+'</div><div class="stat-mini-label">Total códigos</div></div>'+
+    '<div class="stat-mini"><div class="stat-mini-val" style="color:var(--accent)">'+prems.length+'</div><div class="stat-mini-label">Premium</div></div>'+
+    '<div class="stat-mini"><div class="stat-mini-val" style="color:#c9a84c">'+encs.length+'</div><div class="stat-mini-label">Encargado</div></div>'+
+    '<div class="stat-mini"><div class="stat-mini-val">'+usados.length+'</div><div class="stat-mini-label">Activos</div></div>'+
+    '<div class="stat-mini"><div class="stat-mini-val" style="color:var(--danger)">'+vencidos.length+'</div><div class="stat-mini-label">Vencidos</div></div>';
+}
+
+function renderRegistro(){
+  const reg=loadRegistro();
+  const tbody=document.getElementById('registro-body');
+  if(!reg.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px;">No hay códigos registrados aún</td></tr>';return;}
+  const hoy=new Date().toISOString().split('T')[0];
+  tbody.innerHTML=reg.map((r,i)=>{
+    const tipo=r.codigo.startsWith('ENC')?'ENC':'PREM';
+    const vencido=r.vence&&r.vence<hoy;
+    return '<tr>'+
+      '<td><span style="font-family:DM Mono,monospace;font-size:12px;">'+r.codigo+'</span></td>'+
+      '<td><span class="badge '+(tipo==='ENC'?'badge-enc':'badge-prem')+'">'+tipo+'</span></td>'+
+      '<td>'+r.usuario+'</td>'+
+      '<td><a href="mailto:'+r.email+'" style="color:var(--accent);font-size:12px;">'+r.email+'</a></td>'+
+      '<td style="font-size:12px;">'+( r.vence||'—')+'</td>'+
+      '<td><span class="badge '+(vencido?'badge-used':'badge-ok')+'">'+(vencido?'Vencido':r.estado||'Activo')+'</span></td>'+
+      '<td><button class="del-btn" onclick="eliminarRegistro('+i+')">&#x2715;</button></td>'+
+    '</tr>';
+  }).join('');
+}
+
+function agregarRegistro(){
+  const codigo=document.getElementById('reg-codigo').value.trim().toUpperCase();
+  const usuario=document.getElementById('reg-usuario').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
+  const vence=document.getElementById('reg-vence').value;
+  if(!codigo||!usuario){alert('Ingresa al menos el código y nombre de usuario.');return;}
+  const reg=loadRegistro();
+  reg.push({codigo,usuario,email,vence,estado:'Activo',fecha:new Date().toISOString().split('T')[0]});
+  saveRegistro(reg);
+  ['reg-codigo','reg-usuario','reg-email','reg-vence'].forEach(id=>document.getElementById(id).value='');
+  renderRegistro();renderStats();
+}
+
+function eliminarRegistro(idx){
+  if(!confirm('¿Eliminar este registro?'))return;
+  const reg=loadRegistro();reg.splice(idx,1);saveRegistro(reg);renderRegistro();renderStats();
+}
+
+function exportarRegistro(){
+  const reg=loadRegistro();
+  if(!reg.length){alert('No hay registros para exportar.');return;}
+  const rows=[['Código','Tipo','Usuario','Email','Vencimiento','Estado','Fecha alta']];
+  reg.forEach(r=>rows.push([r.codigo,r.codigo.startsWith('ENC')?'Encargado':'Premium',r.usuario,r.email,r.vence||'',r.estado||'Activo',r.fecha||'']));
+  const csv=rows.map(r=>r.map(v=>'"'+v+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='RehabPlanner_Codigos_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
